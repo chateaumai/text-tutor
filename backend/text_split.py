@@ -8,5 +8,5 @@ def process_documents(page_contents):
         chunk_size = 1200,
         chunk_overlap  = 50
     )
-    texts = text_splitter.split_documents(documents)
-    return texts
+    split_documents = text_splitter.split_documents(documents)
+    return split_documents

@@ -1,21 +1,32 @@
 from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
 from langchain.vectorstores import Pinecone
-from langchain.embeddings.openai import OpenAIEmbeddings
-import pinecone
-from config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_API_ENV
+from .config import OPENAI_API_KEY
 
-def get_query_result(texts, query):
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
-    pinecone.init(
-        api_key=PINECONE_API_KEY,
-        environment=PINECONE_API_ENV
+def get_prompt():
+    template = '''You are a tutor that is an expert in the field related to the context provided.
+    Answer the user's question in a way what is helpful and promotes as much learning as possible.
+    Be detailed in answers and give examples when appropriate. Information should explained
+    step by step when needed. If a question can not be answered using the information provided
+    from the documentation, answer with "I don't know"
+
+    {context}
+
+    Question: {question}'''
+
+    PROMPT = PromptTemplate(
+        template=template, input_variables=["context", "question"]
     )
-    index_name = "texttutor"
-    docsearch = Pinecone.from_existing_index(index_name, embeddings)
-    docs = docsearch.similarity_search(query)
+    return PROMPT
 
+def answer(query: str, docsearch: Pinecone) -> str:
+
+    docs = docsearch.similarity_search(query)
     llm = OpenAI(temperature=0.5, openai_api_key=OPENAI_API_KEY)
-    chain = load_qa_chain(llm, chain_type="stuff")
-    result = chain.run(input_documents=docs, question=query)
+    PROMPT = get_prompt()
+    chain = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT)
+    result = chain.run({"input_documents": docs, "question": query})
+    #result = chain.run(input_documents=docs, question=query)
     return result

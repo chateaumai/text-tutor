@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Text Tutor</title>
+    </head>
+    <style>
+        #chatbox {
+            max-width: 500px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        p{
+            margin: 5px 0;
+        }
+    </style>
+    <body>
+        <form action="/chat" method="POST">
+            <input type="text" name="question" required>
+            <button type="submit">Ask</button>
+        </form>
+        <div id="chatbox">
+            {% for entry in history %}
+                <p><b>You:</b> {{ entry['question'] }}</p>
+                <p><b>Bot:</b> {{ entry['answer'] }}</p>
+                {% endfor %}
+        </div>
+    </body>
+</html>
