@@ -31,6 +31,8 @@ def hello_world():
     return '<h1>Hello World</h1>'
 
 docsearch_storage = {}
+retriever_storage = {}
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
@@ -45,15 +47,14 @@ def upload():
             print("getting docsearch")
             #docsearch = handle_upload.get_docsearch(documents, upload_id)
             print("after docsearch")
+            retriever = handle_upload.hybrid_search(documents)
             docsearch = existing_index.get_docsearch_from_existing()
+
             docsearch_storage[upload_id] = docsearch
-            session['upload_id'] = upload_id
-            print("after save")
-            '''serialized_docsearch = pickle.dumps(docsearch)
-            session['docsearch'] = serialized_docsearch
+            retriever_storage[upload_id] = retriever
             session['upload_id'] = upload_id
 
-            ans = answer(query, docsearch)'''
+            print("after save")
 
             return redirect('/chat')
         else:
@@ -69,11 +70,12 @@ def chat():
 
     upload_id = session['upload_id']
     docsearch = docsearch_storage.get(upload_id)
+    retriever = retriever_storage.get(upload_id)
 
     if request.method == 'POST':
         question = request.form.get('question')
-        ans = query.answer(question, docsearch)
-    #    print(ans)
+        #ans = query.answer(question, docsearch)
+        ans = query.answer_hybrid(question, retriever)
         session['history'].append({
             'question': question,
             'answer': ans
