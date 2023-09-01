@@ -7,7 +7,7 @@ import sys
 import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ..backend import text_split, handle_upload, query, file_loader, existing_index
+from ..backend import query_backup, text_split, handle_upload, file_loader, existing_index, agent
 
 '''from backend.processing import process_documents
 from backend.handle_upload import get_docsearch
@@ -32,27 +32,28 @@ def hello_world():
 
 docsearch_storage = {}
 retriever_storage = {}
+doc_storage = {}
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         if 'pdf' in request.files:
             filename = pdfs.save(request.files['pdf'])
-            print("getting page contents")
+
             page_contents = file_loader.load_file(filename)
-            print("getting docs")
             documents = text_split.process_documents(page_contents)
-            session.clear()
-            upload_id = uuid.uuid4().hex
-            print("getting docsearch")
             #docsearch = handle_upload.get_docsearch(documents, upload_id)
-            print("after docsearch")
+
             retriever = handle_upload.hybrid_search(documents)
             docsearch = existing_index.get_docsearch_from_existing()
 
+            session.clear()
+            upload_id = uuid.uuid4().hex
+
+            session['upload_id'] = upload_id
+            doc_storage[upload_id] = documents
             docsearch_storage[upload_id] = docsearch
             retriever_storage[upload_id] = retriever
-            session['upload_id'] = upload_id
 
             print("after save")
 
@@ -64,7 +65,6 @@ def upload():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
-#    docsearch = pickle.load(session['docsearch'])
     if 'history' not in session:
         session['history'] = []
 
@@ -74,8 +74,7 @@ def chat():
 
     if request.method == 'POST':
         question = request.form.get('question')
-        #ans = query.answer(question, docsearch)
-        ans = query.answer_hybrid(question, retriever)
+        ans = agent.decide_retriever(question, docsearch, retriever)
         session['history'].append({
             'question': question,
             'answer': ans
@@ -84,12 +83,8 @@ def chat():
         return redirect('/chat')
     
     else:
-        #ans = session['answer']
         return render_template('chat.html', history=session['history'])
 
-    #POST the answer as query
-    #GET the ans
-    #loop this
 
 
 if __name__ == '__main__':
