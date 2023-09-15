@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, session
+from flask import Flask, request, render_template, redirect, session, jsonify
 import pickle
 from werkzeug.utils import secure_filename
 from flask_uploads import UploadSet, configure_uploads, DOCUMENTS
@@ -13,7 +13,7 @@ from ..backend import query_backup, text_split, handle_upload, file_loader, exis
 from backend.handle_upload import get_docsearch
 from backend.query import answer'''
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'your_secret_key_here'
 pdfs = UploadSet('pdfs', DOCUMENTS)
 
@@ -28,7 +28,8 @@ configure_uploads(app, pdfs)
 
 @app.route('/')
 def hello_world():
-    return '<h1>Hello World</h1>'
+    return redirect('/upload')
+    #return '<h1>Hello Worldd</h1>'
 
 docsearch_storage = {}
 retriever_storage = {}
@@ -80,7 +81,7 @@ def chat():
             'answer': ans
         })
         session.modified = True
-        return redirect('/chat')
+        return jsonify({'answer': ans})
     
     else:
         return render_template('chat.html', history=session['history'])
@@ -88,4 +89,6 @@ def chat():
 
 
 if __name__ == '__main__':
-   app.run(port=8000, debug=True)
+    extra_dirs = ['templates/', 'static/']
+    app.run(port=8000, debug=True, extra_files=extra_dirs)
+
