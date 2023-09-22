@@ -1,9 +1,8 @@
 import fitz
 from typing import Dict
 
-
+#not used
 def get_bookmarks(filepath: str) -> Dict[str, int]:
-    # WARNING! One page can have multiple bookmarks!
     bookmarks = {}
     with fitz.open(filepath) as doc:
         toc = doc.get_toc()  # [[lvl, title, page, …], …]
@@ -14,11 +13,10 @@ def get_bookmarks(filepath: str) -> Dict[str, int]:
 def crop(file_name):
     path = "/Users/aaronmai/Desktop/TextTutor/text_tutor/backend/uploads/" + file_name
     doc = fitz.open(path)
+    doc_metadata = doc.metadata
+    title = doc_metadata.get("title")
 
     for i in range(len(doc)):
-
-        if i < 9:
-            continue
 
         page = doc[i]
         cropbox = page.rect
@@ -26,7 +24,7 @@ def crop(file_name):
         page.set_cropbox(cropbox)
     # Save the modified PDF
     doc.saveIncr()
-    return path
+    return path, title
 
     #chapters = table_of_contents.keys()
     #chapter_list = list(chapters)

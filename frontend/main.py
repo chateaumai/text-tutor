@@ -1,50 +1,47 @@
 from flask import Flask, request, render_template, redirect, session, jsonify
-import pickle
-from werkzeug.utils import secure_filename
 from flask_uploads import UploadSet, configure_uploads, DOCUMENTS
 import os
+from dotenv import load_dotenv
 import sys
 import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ..backend import query_backup, text_split, handle_upload, file_loader, existing_index, agent
+from ..backend import text_split, handle_upload, file_loader, existing_index, agent
 
-'''from backend.processing import process_documents
-from backend.handle_upload import get_docsearch
-from backend.query import answer'''
+load_dotenv()
+FLASK_KEY = os.environ.get('FLASK_KEY')
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = 'your_secret_key_here'
+app.secret_key = FLASK_KEY
 pdfs = UploadSet('pdfs', DOCUMENTS)
 
-#BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#to get the correct path to store a textbook
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOADS_PATH = os.path.join(BASE_DIR, 'backend/uploads')
-print(UPLOADS_PATH)
 app.config['UPLOADED_PDFS_DEST'] = UPLOADS_PATH
 configure_uploads(app, pdfs)
 
-#global data, page_contents, table_of_contents, texts
+#feels like a better way to do this
+docsearch_storage = {}
+retriever_storage = {}
+doc_storage = {}
 
 @app.route('/')
 def hello_world():
     return redirect('/upload')
-    #return '<h1>Hello Worldd</h1>'
-
-docsearch_storage = {}
-retriever_storage = {}
-doc_storage = {}
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         if 'pdf' in request.files:
             filename = pdfs.save(request.files['pdf'])
-
-            page_contents = file_loader.load_file(filename)
+            
+            #getting texts
+            page_contents, title = file_loader.load_file(filename)
             documents = text_split.process_documents(page_contents)
             #docsearch = handle_upload.get_docsearch(documents, upload_id)
 
+            #storing texts in database
             retriever = handle_upload.hybrid_search(documents)
             docsearch = existing_index.get_docsearch_from_existing()
 
@@ -56,7 +53,7 @@ def upload():
             docsearch_storage[upload_id] = docsearch
             retriever_storage[upload_id] = retriever
 
-            print("after save")
+            session['title'] = title
 
             return redirect('/chat')
         else:
@@ -72,6 +69,8 @@ def chat():
     upload_id = session['upload_id']
     docsearch = docsearch_storage.get(upload_id)
     retriever = retriever_storage.get(upload_id)
+    title = session.get('title', 'Text Tutor')
+
 
     if request.method == 'POST':
         question = request.form.get('question')
@@ -84,7 +83,7 @@ def chat():
         return jsonify({'answer': ans})
     
     else:
-        return render_template('chat.html', history=session['history'])
+        return render_template('chat.html', history=session['history'], title=title)
 
 
 

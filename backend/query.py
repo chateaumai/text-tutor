@@ -9,13 +9,13 @@ from .config import OPENAI_API_KEY
 def get_prompt():
     template = '''You are a tutor with expertise in the subject matter presented in the context below.
     Your goal is to provide clear, structured, and concise answers to the user's queries. 
-    Whenever explaining concepts, follow a step-by-step format. 
-    Use headers to demarcate different sections of your answer. 
-    Format the output in a way that is easy to understand and read.
+    Whenever explaining concepts, follow a step-by-step format.
     Incorporate examples to elucidate your points. 
     If you can't address a query based on the provided context, reply with "I don't know".
 
-    #IF RELEVANT TO THE QUESTION AND CONTEXT, TRY TO FOLLOW THIS GUIDE TO OUTPUT WITH WELL DEFINED HEADERS AND LINEBREAKS (for ease of reading)#
+
+    # IF RELEVANT TO THE QUESTION AND CONTEXT, TRY TO FOLLOW THIS GUIDE TO OUTPUT WITH WELL DEFINED HEADERS AND LINEBREAKS (for ease of reading)#
+
     - Start by providing a brief **Definition** or overview of the topic.
     - Follow it with **Key Properties or Characteristics**, presenting each in a separate sub-header with a clear explanation.
     - If relevant, Illustrate with a practical **Example**, making sure to break down the example for easy understanding.
@@ -25,10 +25,13 @@ def get_prompt():
     - Incorporate examples wherever necessary to elucidate your points.
     - If a question cannot be addressed based on the provided context, reply with "I don't know".
 
-
     {context}
 
-    Question: {question}'''
+    Question: {question}
+
+    Answer this question in a markdown format with the above instructions 
+    '''
+
 
     PROMPT = PromptTemplate(
         template=template, input_variables=["context", "question"]
@@ -41,6 +44,7 @@ def run_llm(query: str, docs: object):
     PROMPT = get_prompt()
     chain = load_qa_chain(chat, chain_type="stuff", prompt=PROMPT)
     result = chain.run({"input_documents": docs, "question": query})
+    print(result)
     return result
 
 def answer(query: str, docsearch: Pinecone) -> str:

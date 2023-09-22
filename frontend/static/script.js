@@ -22,9 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let userMessage = document.createElement('p');
             userMessage.innerHTML = `<b>You:</b> ${questionText}`;
+            
+            let botResponseHtml = marked.marked(data.answer);  //turn markdown to html
+            console.log(botResponseHtml)
 
-            let botMessage = document.createElement('p');
-            botMessage.innerHTML = `<b>Bot:</b> ${data.answer}`;
+            let botMessage = document.createElement('div');
+            botMessage.innerHTML = `<b>Text Tutor:</b> ${botResponseHtml}`;
 
             chatbox.appendChild(userMessage);
             chatbox.appendChild(botMessage);

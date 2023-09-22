@@ -43,12 +43,11 @@ def hybrid_search(documents):
             attributes=[],
             create_schema_if_missing=True,
         )
-        print("starting to add")
+        print("adding to weaviate")
         retriever.add_documents(documents)
-        print("done adding")
 
     else:
-        print("not adding")
+        print("using existing weaviate")
         retriever = WeaviateHybridSearchRetriever(
             client=client,
             index_name=index_name,
