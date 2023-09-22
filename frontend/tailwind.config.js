@@ -10,6 +10,9 @@ module.exports = {
     extend: {
       colors: {
         violet: colors.violet
+      },
+      fontFamily: {
+        'lato': ['Lato', 'san-serif']
       }
     },
   },
