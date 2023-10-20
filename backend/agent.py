@@ -7,6 +7,7 @@ from langchain.retrievers.weaviate_hybrid_search import WeaviateHybridSearchRetr
 #prompt
 #load_qa
 
+#Between pinecone semantic and weaviate's hybrid
 functions = [
     {
         "name": "answer",
@@ -51,6 +52,7 @@ functions = [
     }
 ]
 
+#choosing which one
 def decide_retriever(question: str, pinecone_retriever: Pinecone, weaviate_retriever: WeaviateHybridSearchRetriever):
 
     messages = [

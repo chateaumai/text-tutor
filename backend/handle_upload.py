@@ -6,25 +6,28 @@ from langchain.retrievers.weaviate_hybrid_search import WeaviateHybridSearchRetr
 from langchain.vectorstores import Weaviate
 from .config import OPENAI_API_KEY, PINECONE_API_KEY, PINECONE_API_ENV, WEAVIATE_URL, WEAVIATE_API_KEY
 
-def get_docsearch(documents, upload_id):
+def get_docsearch(documents):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     pinecone.init(
         api_key=PINECONE_API_KEY,
         environment=PINECONE_API_ENV
     )
-    index_name = f"texttutor-{upload_id}"
-
-    pinecone.create_index(
-        name=index_name,
-        metric='cosine',
-        dimension=1536
-    )
-    #needs list of strings
-    #docsearch = Pinecone.from_existing_index(index_name, embeddings)
-    print('start embed')
-    docsearch = Pinecone.from_documents(documents, embeddings, index_name=index_name)
+    index_name = "texttutor"
+    #creating a new index
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            name=index_name,
+            metric='cosine',
+            dimension=1536
+        )
+        print('start embedding process')
+        docsearch = Pinecone.from_documents(documents, embeddings, index_name=index_name)
+    else:
+        print("pinecone index already exists")
+        docsearch = Pinecone.from_existing_index(index_name, embeddings)
     return docsearch
 
+#weaviate
 def hybrid_search(documents):
     client = weaviate.Client(
         url=WEAVIATE_URL,

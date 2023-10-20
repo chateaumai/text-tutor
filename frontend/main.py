@@ -34,26 +34,26 @@ def hello_world():
 def upload():
     if request.method == 'POST':
         if 'pdf' in request.files:
+            upload_id = uuid.uuid4().hex
+            #file name to output later on top of screen
             filename = pdfs.save(request.files['pdf'])
             
             #getting texts
             page_contents, title = file_loader.load_file(filename)
             documents = text_split.process_documents(page_contents)
-            #docsearch = handle_upload.get_docsearch(documents, upload_id)
 
             #storing texts in database
+            docsearch = handle_upload.get_docsearch(documents)
             retriever = handle_upload.hybrid_search(documents)
-            docsearch = existing_index.get_docsearch_from_existing()
 
             session.clear()
-            upload_id = uuid.uuid4().hex
-
+            #saves for access in /chat
             session['upload_id'] = upload_id
+            session['title'] = title
             doc_storage[upload_id] = documents
             docsearch_storage[upload_id] = docsearch
             retriever_storage[upload_id] = retriever
 
-            session['title'] = title
 
             return redirect('/chat')
         else:
@@ -63,14 +63,16 @@ def upload():
 
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
+
     if 'history' not in session:
         session['history'] = []
 
+    #retrieving stored info
     upload_id = session['upload_id']
     docsearch = docsearch_storage.get(upload_id)
     retriever = retriever_storage.get(upload_id)
+    #will default to Text Tutor up top
     title = session.get('title', 'Text Tutor')
-
 
     if request.method == 'POST':
         question = request.form.get('question')

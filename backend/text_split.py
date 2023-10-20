@@ -1,6 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
+#splitting book into chunks
 def process_documents(page_contents):
     documents = [Document(page_content=content) for content in page_contents]
 

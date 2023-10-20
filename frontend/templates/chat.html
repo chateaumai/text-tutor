@@ -3,9 +3,9 @@
     <head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="./static/css/output.css">
-        
+
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Text Tutor</title>
@@ -18,8 +18,12 @@
         <div class="flex-grow flex flex-col items-center mt-4">
             <div id="chatbox" class="flex-grow border rounded mx-auto p-4 max-w-3xl mb-4 bg-white shadow-md overflow-y-auto" style="display: none; max-height: 80vh;">
                 {% for entry in history %}
-                <p class="my-1"><b>You:</b> {{ entry['question']|safe }}</p>
-                <p class="my-1"><b>Text Tutor:</b> {{ entry['answer']|safe }}</p>
+                <div class="bg-gray-200 p-2 rounded my-2">
+                    <p class="my-1"><b>You:</b> {{ entry['question']|safe }}</p>
+                </div>
+                <div class="p-2">
+                    <p class="my-1">{{ entry['answer']|safe }}</p>
+                </div>
                 {% endfor %}
             </div>
         </div>

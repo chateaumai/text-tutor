@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(botResponseHtml)
 
             let botMessage = document.createElement('div');
-            botMessage.innerHTML = `<b>Text Tutor:</b> ${botResponseHtml}`;
+            botMessage.innerHTML = `<div class="prose max-w-none"> ${botResponseHtml}`;
 
             chatbox.appendChild(userMessage);
             chatbox.appendChild(botMessage);
