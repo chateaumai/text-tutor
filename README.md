@@ -6,9 +6,8 @@ The uploaded textbook's textual information is separated into chunks, which are 
 
 These embeddings are then stored in Pinecone and Weaviate (vector databases). When a question is asked, the vector embeddings stored in the DB that are close in meaning with the question are returned, giving the large language model the context to aid answering.
 
-<img width="1440" alt="Screen Shot 2023-09-22 at 4 45 48 AM" src="https://github.com/chateaumai/text-tutor/assets/136946607/22c360c8-d9b3-4835-aff0-24b812ae29b6">
+<img width="1360" alt="Screen Shot 2023-10-20 at 2 21 41 AM" src="https://github.com/chateaumai/text-tutor/assets/136946607/9dff5ff1-d140-4a25-b62b-aee929df09a1">
 
-In this example you can see that the llm understood what rv was in the context of statistics due to the textbook content. If you were to ask chatgpt the same question it would think you are talking about the rv car.
 
 LangChain was used for the LLM instance, as well as chunking the textbook and connecting to the vector databases.
 
